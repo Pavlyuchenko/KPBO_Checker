@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.common.keys import Keys
+import test
 
 wanted_books = {
     'Algor, Mráz a hry': 'https://www.okpb.cz/clavius/l.dll?cll~P=276922',
@@ -11,6 +12,8 @@ wanted_books = {
     'Kronika sci-fi': 'https://www.okpb.cz/clavius/l.dll?cll~P=430248',
     'Resturant na konci vesmíru': 'https://www.okpb.cz/clavius/l.dll?cll~P=283832',
 }
+
+print("Running")
 
 options = FirefoxOptions()
 options.add_argument("--headless")
@@ -58,3 +61,4 @@ for book in wanted_books.keys():
         print("Not available")
 
 driver.close()
+print("Finished")
