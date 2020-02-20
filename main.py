@@ -13,8 +13,6 @@ wanted_books = {
     'Resturant na konci vesmíru': 'https://www.okpb.cz/clavius/l.dll?cll~P=283832',
 }
 
-print("Running")
-
 options = FirefoxOptions()
 options.add_argument("--headless")
 driver = webdriver.Firefox(executable_path="./geckodriver.exe", options=options)
@@ -53,12 +51,13 @@ for book in wanted_books.keys():
                 time.sleep(2)
                 driver.find_element_by_id('RC').send_keys(Keys.ENTER)
                 print("Ordered")  # To-Do: Email
+                test.send_email("KPBO Objednávka", 'Tvá objednávka knihy ____ byla provedena')
                 ordered = True
                 break
             except:
                 pass
     if not ordered:
         print("Not available")
+        test.send_email("KPBO Objednávka", 'Tvá objednávka knihy ' + book + ' nebyla provedena')
 
 driver.close()
-print("Finished")
