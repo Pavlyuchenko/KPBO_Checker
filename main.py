@@ -1,13 +1,42 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.common.keys import Keys
-import email_sending
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+
+# TODO - HTML functions such as h1() to make h1("HEllo") -> <h1>Hello</h1>
+def send_email(message, subject='Objednávka knihy', send_to='michaelg.pavlicek@gmail.com'):
+    email = 'michaelg.pavlicek@gmail.com'
+    password = 'Amaroon15122002'
+    send_to_email = send_to
+    subject = subject
+    header = '<body style="font-weight: 700;"><div style="display: flex; align-items: center;"> <img src="https://kpbo.cz/wp-content/uploads/2015/07/logoheader.png"/> <span style="font-size: 50px; color: #564732;">Knihovna Petra Bezruče Opava</span> </div> <hr>'
+    body = '<h3 style="margin-left: 30px; font-size: 24px; color: #564732">Kniha <u>' + message + '</u> byla objednána </h3> <a href="https://www.okpb.cz/Opava/cs/orders" style="margin-left: 30px;background-color: #564732;border: none;color: white; padding: 5px 10px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;">Zkontrolovat Objednávky odložení</a>'
+    messageHTML = header + body
+
+    msg = MIMEMultipart('alternative')
+    msg['From'] = email
+    msg['To'] = send_to_email
+    msg['subject'] = subject
+
+    msg.attach(MIMEText(messageHTML, 'html'))
+
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(email, password)
+    text = msg.as_string()
+    server.sendmail(email, send_to_email, text)
+    server.quit()
+
+
 
 
 def get_books_from_file():
     books = {}
 
-    file = open('books.txt', 'r')
+    file = open('C:\\Users\\Michal\\Desktop\\books.txt', 'r')
 
     for line in file:
         books[line.split(':')[0]] = line.split(':')[1] + ":" + line.split(':')[2]
@@ -17,7 +46,7 @@ def get_books_from_file():
 def remove_book_from_file(book):
     books = {}
 
-    file = open('books.txt', 'r')
+    file = open('C:\\Users\\Michal\\Desktop\\books.txt', 'r')
 
     for line in file:
         if not line.split(":")[0] == book:
@@ -34,8 +63,9 @@ wanted_books = get_books_from_file()
 
 options = FirefoxOptions()
 options.add_argument("--headless")
-driver = webdriver.Firefox(executable_path="./geckodriver.exe")
+driver = webdriver.Firefox(executable_path="C:\\Users\\Michal\\Desktop\\geckodriver.exe", options=options)
 
+print("Starting geckodriver.exe (Firefox)...")
 
 for book in wanted_books.keys():
     ordered = False
@@ -58,9 +88,9 @@ for book in wanted_books.keys():
             driver.find_element_by_id('RC').send_keys('751115')  # Password
 
             driver.find_element_by_id('RC').send_keys(Keys.ENTER)  # Confirm
-            print("Ordered")
+            print("\n" + book + " was ordered. \n")
             ordered = True
-            email_sending.send_email(book)
+            send_email(book)
             remove_book_from_file(book)
             break
         except:  # Second try, for special reason: The td might be on another index
@@ -70,14 +100,16 @@ for book in wanted_books.keys():
                 driver.find_element_by_id('RC').send_keys('751115')  # Password
 
                 driver.find_element_by_id('RC').send_keys(Keys.ENTER)
-                print("Ordered")
-                email_sending.send_email(book)
+                print("\n" + book + " was ordered. \n")
+                send_email(book)
                 remove_book_from_file(book)
                 ordered = True
                 break
             except:
                 pass
     if not ordered:
-        print("Not available")
+        print(book + " is not available")
+        send_email(book)
 
 driver.close()
+print("Process finished")

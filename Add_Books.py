@@ -5,7 +5,7 @@ eel.init('web')
 
 @eel.expose
 def save_book(book_name, url):
-    file = open('books.txt', 'r+')
+    file = open('C:\\Users\\Michal\\Desktop\\books.txt', 'r+')
     for line in file:
         pass
     file.write('\n' + book_name + ":" + url)
