@@ -1,21 +1,41 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.common.keys import Keys
-import test
+import email_sending
 
-wanted_books = {
-    'Algor, Mráz a hry': 'https://www.okpb.cz/clavius/l.dll?cll~P=276922',
-    'Karotsský gambit': 'https://www.okpb.cz/clavius/l.dll?cll~P=1260300',
-    'Jméno větru': 'https://www.okpb.cz/clavius/l.dll?cll~P=223432',
-    'Ideální investiční portfolio': 'https://www.okpb.cz/clavius/l.dll?cll~P=2527349',
-    'Začínáme na burze': 'https://www.okpb.cz/clavius/l.dll?cll~P=1659855',
-    'Kronika sci-fi': 'https://www.okpb.cz/clavius/l.dll?cll~P=430248',
-    'Resturant na konci vesmíru': 'https://www.okpb.cz/clavius/l.dll?cll~P=283832',
-}
+
+def get_books_from_file():
+    books = {}
+
+    file = open('books.txt', 'r')
+
+    for line in file:
+        books[line.split(':')[0]] = line.split(':')[1] + ":" + line.split(':')[2]
+    return books
+
+
+def remove_book_from_file(book):
+    books = {}
+
+    file = open('books.txt', 'r')
+
+    for line in file:
+        if not line.split(":")[0] == book:
+            books[line.split(':')[0]] = line.split(':')[1] + ":" + line.split(':')[2]
+
+    file.close()
+
+    file = open('books.txt', 'w')
+    for i, j in books.items():
+        file.write(i + ":" + j)
+
+
+wanted_books = get_books_from_file()
 
 options = FirefoxOptions()
 options.add_argument("--headless")
-driver = webdriver.Firefox(executable_path="./geckodriver.exe", options=options)
+driver = webdriver.Firefox(executable_path="./geckodriver.exe")
+
 
 for book in wanted_books.keys():
     ordered = False
@@ -25,8 +45,9 @@ for book in wanted_books.keys():
     for i in table_rows:  # For each table row
         try:
             valid = i.find_element_by_class_name('SVSL1')  # If you find table row that stands for some oddělení
-            if valid.text == "  " or valid.text == " M/III " or valid.text == " KA ":  # Then check if it is one of my possible oddělení
-                potentional_free_books.append(i)  # If the two upper conditions are met, add it to the list
+            valid = ''.join([i for i in valid.text if not i.isdigit()]).replace("  ", " ").replace(".", "")
+            if valid == " " or valid == "  " or valid == " M/III " or valid == " KA " or valid == " BIS ":  # Then check if it is one of my possible oddělení
+                potentional_free_books.append(i)  # If the two upper conditions are met, add it to the List
         except:
             pass
 
@@ -35,29 +56,28 @@ for book in wanted_books.keys():
             i.find_elements_by_tag_name('td')[4].click()  # Try to click 'objednat odložení'
             driver.find_element_by_id('CC').send_keys('17753')  # Username
             driver.find_element_by_id('RC').send_keys('751115')  # Password
-            import time
-            time.sleep(2)
+
             driver.find_element_by_id('RC').send_keys(Keys.ENTER)  # Confirm
-            print("Ordered")  # To-Do: Email
+            print("Ordered")
             ordered = True
+            email_sending.send_email(book)
+            remove_book_from_file(book)
             break
         except:  # Second try, for special reason: The td might be on another index
             try:
                 i.find_elements_by_tag_name('td')[3].click()  # Try to click 'objednat odložení'
                 driver.find_element_by_id('CC').send_keys('17753')  # Username
                 driver.find_element_by_id('RC').send_keys('751115')  # Password
-                import time
 
-                time.sleep(2)
                 driver.find_element_by_id('RC').send_keys(Keys.ENTER)
-                print("Ordered")  # To-Do: Email
-                test.send_email("KPBO Objednávka", 'Tvá objednávka knihy ____ byla provedena')
+                print("Ordered")
+                email_sending.send_email(book)
+                remove_book_from_file(book)
                 ordered = True
                 break
             except:
                 pass
     if not ordered:
         print("Not available")
-        test.send_email("KPBO Objednávka", 'Tvá objednávka knihy ' + book + ' nebyla provedena')
 
 driver.close()
