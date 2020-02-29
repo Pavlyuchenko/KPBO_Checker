@@ -54,9 +54,11 @@ def remove_book_from_file(book):
 
     file.close()
 
-    file = open('books.txt', 'w')
+    file = open('C:\\Users\\Michal\\Desktop\\books.txt', 'w')
     for i, j in books.items():
         file.write(i + ":" + j)
+
+remove_book_from_file('Jméno větru')
 
 
 wanted_books = get_books_from_file()
@@ -109,7 +111,6 @@ for book in wanted_books.keys():
                 pass
     if not ordered:
         print(book + " is not available")
-        send_email(book)
 
 driver.close()
 print("Process finished")

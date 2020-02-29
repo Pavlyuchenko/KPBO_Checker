@@ -12,11 +12,12 @@ def get_books_from_file():
 
 
 template = open('C:\\Users\\Michal\\Desktop\\template.txt', 'r',encoding="utf-8")
-html = open('C:\\Users\\Michal\\Desktop\\result.html', 'w',encoding="utf-8")
+html = open('C:\\Users\\Michal\\Desktop\\web\\result.html', 'w',encoding="utf-8")
 books = get_books_from_file()
 
 books_list = ""
 for key, value in books.items():
+    print(key)
     books_list += """
     <tr>
           <td>""" + key + """</td>
@@ -24,13 +25,16 @@ for key, value in books.items():
     </tr>"""
 
 for line in template:
+    old = line
     line = line.replace('{}', books_list)
+    if old != line:
+        print(line)
     html.write(line)
 
 template.close()
 html.close()
 
-eel.init('web')
+eel.init('C:\\Users\\Michal\\Desktop\\web')
 
 
 @eel.expose
