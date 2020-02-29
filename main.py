@@ -58,8 +58,6 @@ def remove_book_from_file(book):
     for i, j in books.items():
         file.write(i + ":" + j)
 
-remove_book_from_file('Jméno větru')
-
 
 wanted_books = get_books_from_file()
 
