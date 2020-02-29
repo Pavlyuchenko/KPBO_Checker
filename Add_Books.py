@@ -12,7 +12,7 @@ def get_books_from_file():
 
 
 template = open('C:\\Users\\Michal\\Desktop\\template.txt', 'r',encoding="utf-8")
-html = open('C:\\Users\\Michal\\Desktop\\web\\result.html', 'w',encoding="utf-8")
+html = open('web\\result.html', 'w',encoding="utf-8")
 books = get_books_from_file()
 
 books_list = ""
@@ -34,7 +34,7 @@ for line in template:
 template.close()
 html.close()
 
-eel.init('C:\\Users\\Michal\\Desktop\\web')
+eel.init('web')
 
 
 @eel.expose
